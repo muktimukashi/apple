@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materi Pygame: Catch the Apple</title>
+    <style>
+        /* Tipografi & Warna Dasar */
+        body, html { 
+            margin: 0; padding: 0; height: 100%; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #FDFBF7; 
+            color: #333333; 
+            overflow: hidden; 
+        }
+        
+        h1, h2, h3 { 
+            font-family: 'Georgia', 'Times New Roman', serif; 
+            color: #A51C30; 
+            font-weight: normal;
+        }
+
+        /* Layout Utama */
+        .slide-container { position: relative; width: 100%; height: 100%; }
+        .slide { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: none; flex-direction: column; justify-content: center; 
+            align-items: center; padding: 40px; box-sizing: border-box; 
+        }
+        .slide.active { display: flex; animation: fadeIn 0.4s ease-out; }
+        
+        /* Kartu Konten */
+        .content { 
+            max-width: 900px; width: 100%; 
+            background-color: #FFFFFF; 
+            padding: 40px 50px; 
+            border: 1px solid #EAE6DF; 
+            border-radius: 4px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04); 
+        }
+
+        /* Tipografi Konten */
+        h1 { font-size: 2.8em; margin-top: 0; margin-bottom: 10px; }
+        .subtitle { font-size: 1.2em; color: #666; border-bottom: 1px solid #EAE6DF; padding-bottom: 25px; margin-bottom: 30px; font-family: 'Segoe UI', sans-serif;}
+        h2 { font-size: 1.6em; border-bottom: 1px solid #EAE6DF; padding-bottom: 10px; margin-top: 0; margin-bottom: 15px; }
+        p, li { font-size: 1.1em; line-height: 1.6; color: #444; margin-top: 5px; margin-bottom: 10px;}
+        
+        /* Format Kode */
+        pre { 
+            background: #F7F6F3; padding: 15px; border-radius: 4px; 
+            overflow-x: auto; font-size: 1.05em; 
+            border-left: 4px solid #A51C30; 
+            border-top: 1px solid #EAE6DF;
+            border-right: 1px solid #EAE6DF;
+            border-bottom: 1px solid #EAE6DF;
+            font-family: 'Consolas', 'Courier New', monospace;
+            line-height: 1.4;
+            margin: 15px 0;
+        }
+        code { font-family: 'Consolas', 'Courier New', monospace; color: #A51C30; font-weight: bold; }
+        pre code { color: #333; font-weight: normal; }
+        .comment { color: #6B7280; font-style: italic; }
+
+        /* Elemen UI */
+        .controls { position: fixed; bottom: 40px; right: 40px; z-index: 100; }
+        button { 
+            background: #FFFFFF; color: #A51C30; 
+            border: 1px solid #A51C30; padding: 10px 24px; 
+            font-size: 15px; cursor: pointer; border-radius: 3px; 
+            margin-left: 10px; font-family: 'Segoe UI', sans-serif;
+            transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        button:hover:not(:disabled) { background: #A51C30; color: #FFFFFF; }
+        button:disabled { border-color: #D1D5DB; color: #9CA3AF; cursor: not-allowed; box-shadow: none; }
+        
+        .footer { 
+            position: fixed; bottom: 40px; left: 40px; 
+            font-size: 13px; color: #888; 
+            font-family: 'Georgia', serif; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .slide-counter { position: fixed; top: 40px; right: 40px; font-size: 14px; color: #888; font-family: 'Segoe UI', sans-serif; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    
+    <div class="slide-counter" id="slideCounter">Slide 1 / 9</div>
+
+    <div class="slide-container">
+        <!-- Cover -->
+        <div class="slide active">
+            <div class="content" style="text-align: center; border-top: 6px solid #A51C30;">
+                <h1>Bedah Kode Pygame</h1>
+                <div class="subtitle">Proyek 1: Catch the Apple &mdash; Logika Dasar Mini-Game 2D</div>
+                
+            </div>
+        </div>
+
+        <!-- Point 1 -->
+        <div class="slide">
+            <div class="content">
+                <h2>1. Persiapan dan Setup</h2>
+                <p>Menginisialisasi pustaka Pygame dan mengatur kanvas (layar) tempat game berjalan.</p>
+<pre><code>import pygame, random, sys
+
+pygame.init() <span class="comment"># Menyalakan mesin Pygame</span>
+window = pygame.display.set_mode((500, 600)) <span class="comment"># Kanvas 500x600 px</span>
+pygame.display.set_caption("Catch the Apple")
+clock = pygame.time.Clock() <span class="comment"># Pengatur stabilitas waktu</span></code></pre>
+            </div>
+        </div>
+
+        <!-- Point 2 -->
+        <div class="slide">
+            <div class="content">
+                <h2>2. Instansiasi Objek Game (Aktor)</h2>
+                <p>Membuat wujud nyata objek (keranjang dan apel) menggunakan cetak biru <code>pygame.Rect</code>.</p>
+<pre><code><span class="comment"># Format: Rect(Posisi X, Posisi Y, Lebar, Tinggi)</span>
+player = pygame.Rect(200, 500, 100, 20) <span class="comment"># Keranjang</span>
+
+<span class="comment"># X diacak, Y diletakkan di -50 (luar layar atas)</span>
+apple = pygame.Rect(random.randint(0, 450), -50, 30, 30) 
+score = 0</code></pre>
+            </div>
+        </div>
+
+        <!-- Point 3 -->
+        <div class="slide">
+            <div class="content">
+                <h2>3. Detak Jantung Game (The Game Loop)</h2>
+                <p>Loop tanpa batas yang menahan agar program tidak tertutup, dan mendengarkan event user.</p>
+<pre><code>running = True
+while running:
+    for event in pygame.event.get():
+        <span class="comment"># Jika tombol silang (X) di pojok jendela ditekan</span>
+        if event.type == pygame.QUIT:
+            running = False</code></pre>
+            </div>
+        </div>
+
+        <!-- Point 4 -->
+        <div class="slide">
+            <div class="content">
+                <h2>4. Kontrol dan Batas Layar</h2>
+                <p>Membaca tekanan <i>keyboard</i> (kiri/kanan) dan memberlakukan dinding virtual (*screen boundary*).</p>
+<pre><code>keys = pygame.key.get_pressed()
+
+<span class="comment"># Syarat gerak kiri: sisi kiri belum menabrak batas 0</span>
+if keys[pygame.K_LEFT] and player.left > 0:
+    player.x -= 7
+
+<span class="comment"># Syarat gerak kanan: sisi kanan belum menabrak batas 500</span>
+if keys[pygame.K_RIGHT] and player.right < 500:
+    player.x += 7</code></pre>
+            </div>
+        </div>
+
+        <!-- Point 5 -->
+        <div class="slide">
+            <div class="content">
+                <h2>5. Logika Apel Jatuh & Lewat</h2>
+                <p>Menerapkan simulasi gaya jatuh (gravitasi) dan penalti jika apel terlewat.</p>
+<pre><code>apple.y += 5 <span class="comment"># Apel turun terus-menerus sebesar 5px</span>
+
+if apple.y > 600: <span class="comment"># Jika apel jatuh melewati batas bawah layar</span>
+    apple.y = -50 <span class="comment"># Kembalikan ke atas layar</span>
+    apple.x = random.randint(0, 450) <span class="comment"># Acak posisi horizontalnya</span>
+    score -= 1 <span class="comment"># Hukuman pengurangan skor</span></code></pre>
+            </div>
+        </div>
+
+        <!-- Point 6 -->
+        <div class="slide">
+            <div class="content">
+                <h2>6. Deteksi Tabrakan (Menangkap Apel)</h2>
+                <p>Mengevaluasi intersepsi (perpotongan) antara koordinat keranjang dan koordinat apel.</p>
+<pre><code><span class="comment"># Fungsi otomatis pendeteksi tabrakan kotak</span>
+if player.colliderect(apple):
+    score += 10
+    apple.y = -50 <span class="comment"># Reset vertikal</span>
+    apple.x = random.randint(0, 450) <span class="comment"># Reset horizontal</span></code></pre>
+            </div>
+        </div>
+
+        <!-- Point 7 -->
+        <div class="slide">
+            <div class="content">
+                <h2>7. Menggambar ke Layar (Rendering)</h2>
+                <p>Prosedur visualisasi yang dilakukan berurutan (dari latar belakang hingga objek paling depan).</p>
+<pre><code>window.fill((30, 30, 30)) <span class="comment"># 1. Bersihkan layar agar tidak membekas</span>
+pygame.draw.rect(window, (0, 150, 255), player) <span class="comment"># 2. Gambar Player</span>
+pygame.draw.rect(window, (255, 50, 50), apple)  <span class="comment"># 3. Gambar Apel</span>
+
+<span class="comment"># Merender Surface untuk Teks Skor</span>
+font = pygame.font.SysFont(None, 36)
+score_text = font.render(f"Skor: {score}", True, (255, 255, 255))
+window.blit(score_text, (10, 10)) <span class="comment"># Tempel teks di pojok kiri atas</span></code></pre>
+            </div>
+        </div>
+
+        <!-- Point 8 -->
+        <div class="slide">
+            <div class="content">
+                <h2>8. Penutup Frame</h2>
+                <p>Tahap final dalam satu siklus iterasi frame, dan prosedur mematikan mesin game.</p>
+<pre><code>    pygame.display.update() <span class="comment"># Munculkan gambar ke monitor pemain</span>
+    clock.tick(60) <span class="comment"># Batasi eksekusi loop maksimal 60 kali sedetik</span>
+
+<span class="comment"># Dieksekusi hanya jika loop 'while' sudah selesai (user keluar)</span>
+pygame.quit()
+sys.exit()</code></pre>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>&#8592; Sebelumnya</button>
+        <button id="nextBtn" onclick="changeSlide(1)">Selanjutnya &#8594;</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('slideCounter');
+
+        function changeSlide(direction) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide += direction;
+
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= slides.length) currentSlide = slides.length - 1;
+
+            slides[currentSlide].classList.add('active');
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === slides.length - 1;
+            counter.innerText = `Slide ${currentSlide + 1} / ${slides.length}`;
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight' && currentSlide < slides.length - 1) changeSlide(1);
+            if (event.key === 'ArrowLeft' && currentSlide > 0) changeSlide(-1);
+        });
+        
+        // Inisialisasi awal
+        updateUI();
+    </script>
+</body>
+</html>
